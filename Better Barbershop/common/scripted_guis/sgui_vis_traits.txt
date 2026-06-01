@@ -371,8 +371,6 @@ vis_traits_errors = {
 	effect = {
 		set_variable = scarred_2
 		set_variable = measles
-		set_variable = disfigured_ep3_golden_nose
-		set_variable = disfigured_fp3
 		set_variable = scarred_3
 	}
 }
