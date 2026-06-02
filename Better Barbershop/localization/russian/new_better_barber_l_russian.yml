@@ -4,7 +4,7 @@
   clothes_color_warning: "Разработчики удалили возможность менять цвет одежды :(\nНо мы нашли новый способ!\nИщите мод #high Color Picker for Clothes#!"
   feet_bb: "Футы, F"
   pose_bb: "Поза"
-  height_ruler_bb: "Ростомер, H"
+  height_ruler_bb: "Ростомер"
   height_ruler_bb_tt: "Эта шкала основана на значениях камер в игре.\nВ их файлах указано, что их позиции заданы в сантиметрах, и они совпадают с ростом базовой модели для персонажа.\nМы не можем рассчитать высоту как раньше: разработчики удалили необходимую для этого функцию."
 
   undress_bb: "Раздеть"
@@ -39,10 +39,6 @@
   shadows_bb: "Тени"
   names_bb: "Имена"
   controls_bb: "Кнопки, 4"
-
-  # missing backgrounds:
-  bp1_crossroads_inn: "Трактир"
-  bp1_wine_cellar: "Винный погреб"
 
   # hide: "Hide"
   early_great_pox: "Ранняя $trait_great_pox$"

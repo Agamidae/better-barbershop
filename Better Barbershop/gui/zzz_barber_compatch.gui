@@ -11,12 +11,4 @@ types BARBER {
   type ccp_clothes_color_picker = container {
     visible = no
   }
-  type no_color_picker_tip = text_multi {
-		visible = "[Not(GetVariableSystem.Exists('no_cloth_picker_tip'))]"
-		margin_top = 5
-		text = "clothes_color_warning"
-		autoresize = yes
-    align = center
-		max_width = 500
-	}
 }

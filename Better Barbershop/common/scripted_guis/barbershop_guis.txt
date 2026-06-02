@@ -261,63 +261,6 @@ reset_appearance = {
 	}
 }
 
-
-#TODO
-
-add_children_to_barbershop = {
-	saved_scopes = { player }
-	effect = {
-		clear_variable_list = barber_children
-		every_child = {
-			limit = {
-				is_alive = yes
-				NOT = {
-					is_primary_heir_of = root
-				}
-			}
-			root = {
-				add_to_variable_list = {
-					name = barber_children
-					target = prev
-				}
-			}
-			scope:player = {
-				add_to_variable_list = {
-					name = barber_pinned
-					target = prev
-				}
-			}
-		}
-	}
-	is_shown = {
-		num_of_living_children > 1
-	}
-}
-
-remove_children_from_barbershop = {
-	effect = {
-		clear_variable_list = barber_children
-	}
-}
-
-are_children_pinned = {
-	is_shown = {
-		any_pinned_character = {
-			is_child_of = root
-			NOT = {
-				is_primary_heir_of = root
-			}
-		}
-	}
-}
-
-barber_error_suppression = {
-	is_shown = {
-		has_variable_list = barber_children
-		has_variable_list = barber_pinned
-	}
-}
-
 bb_select_dna_target = {
 	effect = {
 		set_variable = {

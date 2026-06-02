@@ -1,6 +1,8 @@
 
 @max_height_before_scrolling = 920
 
+#BB: made barbershop button visible for everyone
+
 #adjustment to make scrollbar appear as if outside window
 @scrollbar_outside_tweak = 15
 @scrollbar_outside_tweak_negative = -15
@@ -42,12 +44,14 @@ window = {
 			ignoreinvisible = yes
 
 			background = {
-				texture = "gfx/interface/component_tiles/interaction_menu_bg.dds"
+				texture = "gfx/interface/skinned/interaction_menu_bg.dds"
 				spriteType = Corneredtiled
 				spriteborder = { 11 11 }
 				spriteborder_top = 49
 				margin = { 8 14 }
-				margin_right = @scrollbar_outside_tweak_negative_plus_8
+				
+				# don't resize the bg if the menu is empty: outside of diplo range and don't have debug interactions
+				margin_right = "[Select_int32(And(CharacterInteractionMenuWindow.OutsideDiplomaticRange, Not(InDebugMode)), '(int32)0', '(int32)-14')]"
 
 				modify_texture = {
 					name = "overlay"
@@ -62,8 +66,21 @@ window = {
 				name = "character_info"
 
 				hbox = {
-					margin = { 10 0 }
-					margin_bottom = 4
+					margin = { 10 4 }
+
+					background = {
+						using = Background_Header
+						margin = { 0 4 }
+						margin_bottom = 8
+						alpha = 0.5
+					}
+
+					background = {
+						using = Background_Header_Pattern
+						margin = { 0 4 }
+						margin_bottom = 12
+						alpha = 0.5
+					}
 
 					text_single = {
 						name = "character_name"
@@ -87,6 +104,9 @@ window = {
 					expand = {}
 
 					hbox = {
+						
+						UniUI_IMHO_button = {} # mod
+						
 						button_pin = {
 							name = "button_pin"
 							visible = "[Not(Character.IsPinned)]"
@@ -99,7 +119,7 @@ window = {
 
 						button_barbershop = {
 							name = "customize_portrait"
-							# visible = "[Character.CanCustomizePortrait]"
+							# visible = "[Character.CanCustomizePortrait]" # mod BB
 							onclick = "[Character.OnCustomizePortrait]"
 							onclick = "[CharacterInteractionMenuWindow.Close]"
 							size = { 25 25 }
@@ -159,7 +179,8 @@ window = {
 				margin_right = @scrollbar_outside_tweak
 			}
 
-
+			UniUI_IMHO_PoV = {} # mod
+			
 			scrollarea = {
 				autoresizescrollarea = yes
 				scrollbarpolicy_horizontal = always_off
@@ -198,7 +219,7 @@ window = {
 				position = { -5 30 }
 
 				background = {
-					texture = "gfx/interface/component_tiles/interaction_menu_more_bg.dds"
+					texture = "gfx/interface/skinned/interaction_menu_bg.dds"
 					spriteType = Corneredtiled
 					spriteborder = { 11 11 }
 					margin = { 8 8 }

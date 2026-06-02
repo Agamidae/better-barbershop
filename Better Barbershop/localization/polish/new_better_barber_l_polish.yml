@@ -18,7 +18,7 @@
 
   clothes_color_warning: "Developers removed support for changing the color of clothes :(\nBut we found a workaround!\nSearch for #high Color Picker for Clothes#! mod"
 
-  height_ruler_bb: "Height ruler, H"
+  height_ruler_bb: "Height ruler"
   feet_bb: "Feet, F"
   height_ruler_bb_tt: "This ruler is based on the values used by game cameras.\nTheir files mention that their positions are in centimeters, and they match the height of the base character model.\n\nIt's not possible to calculate height like before, the developers removed the function that allowed for it."
 
@@ -40,11 +40,7 @@
   save_dna_bb: "Save [Character.GetFirstNamePossessiveNoTooltip] DNA" # i.e. save bob's dna
   paste_dna_bb: "Paste [AddTextIf(GetPlayer.MakeScope.Var('bb_dna_target').IsSet, Concatenate(GetPlayer.MakeScope.Var('bb_dna_target').GetCharacter.GetFirstNamePossessiveNoTooltip, ' '))]DNA" # paste dna/paste bob's dna
   restore_dna_bb: "Restore original DNA"
-
-  # missing backgrounds:
-  bp1_crossroads_inn: "Inn"
-  bp1_wine_cellar: "Wine cellar"
-
+  
   # hide: "Hide"
   early_great_pox: "Early $trait_great_pox$"
   disturbing_traits_bb: "Disturbing traits"

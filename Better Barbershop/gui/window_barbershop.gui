@@ -1,8 +1,3 @@
-template Barbershop_Font_Size_Huge {
-	fontsize = 33
-	size = { 0 43 }
-}
-
 window = {
 	name = "window_barbershop"
 	datacontext = "[BarbershopWindow.GetScreenshotHandler]"
@@ -33,6 +28,7 @@ window = {
 		using = Sound_WindowHide_Standard
 		on_finish = "[GetVariableSystem.Set('body_changes_tip', Select_CString(GetVariableSystem.Exists('body_changes_tab'), 'hide', 'show'))]"
 		on_finish = "[GetVariableSystem.Set('vis_traits_tip', Select_CString(GetVariableSystem.Exists('vis_traits_tab'), 'hide', 'show'))]"
+		on_finish = "[GetVariableSystem.Clear( 'bb_clothes' )]"
 	}
 
 	### HIDE ALL UI FULLSCREEN ###
@@ -47,6 +43,7 @@ window = {
 	widget = {
 		visible = "[GetVariableSystem.Exists('dont_restore_zoom')]"
 		state = {
+			name = "restore_zoom"
 			trigger_when = "[GetVariableSystem.Exists('restore_zoom')]"
 			on_finish = "[GetVariableSystem.Clear('restore_zoom')]"
 			on_finish = "[GetScriptedGui('clear_zoom').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
@@ -118,13 +115,18 @@ window = {
 
 	widget = {
 		size = { 100% 100% }
-		# background = { using = Background_Area_Border_Solid }
+		# must remain trasnparent so the "map background" works
 
 		background = {
-			background = { using = Background_Area_Border_Solid }
 			texture = "[BarbershopWindow.GetCurrentBackground]"
 			fittype = centercrop
-			alpha = "[Select_float( GetVariableSystem.Exists('barber_dimmed'), '(float)0.5', '(float)1' )]"
+			
+			modify_texture = {
+				using = Background_Area_Border_Solid
+				alpha = 0.5
+				visible = "[GetVariableSystem.Exists('barber_dimmed')]"
+				blend_mode = normal
+			}
 			visible = "[Not(GetVariableSystem.Exists('barber_bg'))]"
 		}
 
@@ -978,6 +980,7 @@ window = {
 											blockoverride "tab_name"
 											{
 												text = "[PdxGuiTabItem.LocalizeTab( 'bb_char_tab' )]"
+												using = TabShortcut
 											}
 										}
 
@@ -1219,6 +1222,29 @@ window = {
 											}
 										}
 									}
+									
+									hbox = {
+										layoutpolicy_horizontal = expanding
+										visible = "[And(BarbershopWindow.IsTabAppearanceVisible, PdxGuiTabs.IsTabSet( 'clothes' ))]"
+										margin_top = 5
+										margin_bottom = -10
+										allow_outside = yes
+										margin_left = 5
+										
+										button_category_bb = {
+											layoutpolicy_horizontal = expanding
+											onclick = "[GetVariableSystem.Toggle('bb_clothes')]"
+											blockoverride "frame" {
+												frame = "[Select_int32( GetVariableSystem.Exists('bb_clothes'), '(int32)1', '(int32)2')]"
+											}
+											blockoverride "text" {
+												text = "bb_char_tab_clothes"
+											}
+										}
+										expand = {}
+										
+									}
+									
 
 									# contents
 									scrollbox = {
@@ -1245,27 +1271,6 @@ window = {
 													layoutpolicy_horizontal = expanding
 													visible = "[PdxGuiTabs.IsTabSet( 'clothes' )]"
 
-													hbox = {
-														layoutpolicy_horizontal = expanding
-
-														button_category = {
-															layoutpolicy_horizontal = expanding
-															onclick = "[GetVariableSystem.Toggle('bb_clothes')]"
-															blockoverride "frame" {
-																frame = "[Select_int32( GetVariableSystem.Exists('bb_clothes'), '(int32)1', '(int32)2')]"
-															}
-															blockoverride "text" {
-																text = "bb_char_tab_clothes"
-															}
-														}
-
-														button_menu = {
-															onclick = "[GetVariableSystem.Toggle('compact_clothes_pickers')]"
-														}
-														expand = {}
-													}
-
-
 													vbox = {
 														visible = "[Not(GetVariableSystem.Exists('bb_clothes'))]"
 														name = "appearance_tab"
@@ -1277,104 +1282,35 @@ window = {
 														item = {
 															hbox = {
 																layoutpolicy_horizontal = expanding
-
+																layoutpolicy_vertical = expanding
+																spacing = 10
+																
 																vbox = {
-																	layoutpolicy_horizontal = expanding
-
+																	spacing = 2
+																	
 																	hbox = {
 																		layoutpolicy_horizontal = expanding
-																		visible = "[GetVariableSystem.Exists('compact_clothes_pickers')]"
-
-																		button = {
-																			size = { 120 30 }
-																			layoutpolicy_horizontal = expanding
-																			onclick = "[BarbershopWindow.ShowSearchFilter( PdxGuiWidget.GetIndexInDataModel )]"
-
-																			hbox = {
-																				spacing = 5
-																				layoutpolicy_horizontal = expanding
-
-																				button_search = {
-																					size = { 25 25 }
-																					alwaystransparent = yes
-																					tooltip = "BARBERSHOP_FUZZY_SEARCH_TT"
-																					using = tooltip_ne
-																					visible = "[Not(BarbershopAccessoryCategory.IsTextSearchVisible)]"
-																				}
-
-																				widget = {
-																					size = { 25 25 }
-																					visible = "[BarbershopAccessoryCategory.IsTextSearchVisible]"
-
-																					button_close = {
-																						onclick = "[BarbershopWindow.ShowSearchFilter( PdxGuiWidget.GetIndexInDataModel )]"
-																						shortcut = close_window
-																						parentanchor = center
-																						alwaystransparent = yes
-																						size = { 22 22 }
-																					}
-																				}
-
-																				text_single = {
-																					alwaystransparent = yes
-																					align = nobaseline
-																					max_width = 420
-																					text = "[BarbershopAccessoryCategory.GetName]"
-																					tooltip = "[BarbershopAccessoryCategory.GetName]"
-																				}
-
-																				expand = {}
-																			}
+																		
+																		text_label_left = {
+																			text = "[BarbershopAccessoryCategory.GetName]"
 																		}
+																		
+																		expand = {}
 																	}
-
+																	
 																	hbox = {
-																		layoutpolicy_horizontal = expanding
-																		widget = {
-																			size = { 20 0 }
-																			visible = "[GetVariableSystem.Exists('compact_clothes_pickers')]"
+																		spacing = 5
+																		
+																		button_search = {
+																			size = { 30 30 }
+																			onclick = "[BarbershopWindow.ShowSearchFilter( PdxGuiWidget.GetIndexInDataModel )]"
+																			
+																			tooltip = "BARBERSHOP_FUZZY_SEARCH_TT"
+																			using = tooltip_ne
+																			using = SubTabShortcut
 																		}
-
-																		hbox = {
-																			visible = "[Not(GetVariableSystem.Exists('compact_clothes_pickers'))]"
-
-																			button = {
-																				size = { 120 30 }
-																				onclick = "[BarbershopWindow.ShowSearchFilter( PdxGuiWidget.GetIndexInDataModel )]"
-
-																				hbox = {
-																					spacing = 5
-																					layoutpolicy_horizontal = expanding
-
-																					button_search = {
-																						size = { 25 25 }
-																						alwaystransparent = yes
-																						tooltip = "BARBERSHOP_FUZZY_SEARCH_TT"
-																						using = tooltip_ne
-																						using = SubTabShortcut
-																					}
-
-																					text_single = {
-																						alwaystransparent = yes
-																						size = { 100 30 }
-																						align = nobaseline
-																						autoresize = no
-																						text = "[BarbershopAccessoryCategory.GetName]"
-																						tooltip = "[BarbershopAccessoryCategory.GetName]"
-																					}
-																				}
-																			}
-																			expand = {}
-																		}
-
+																		
 																		dropdown_menu_standard = {
-																			background = {
-																				texture = "gfx/interface/buttons/button_drop_down.dds"
-																				spriteType = Corneredtiled
-																				spriteborder = { 5 2 }
-																				margin_left = 20
-																				spriteborder_right = 50
-																			}
 																			blockoverride "dropdown_properties"
 																			{
 																				datamodel = "[BarbershopAccessoryCategory.GetItems]"
@@ -1382,46 +1318,40 @@ window = {
 																				onselectionchanged = "[BarbershopAccessoryCategory.OnSelect]"
 																				selectedindex = "[BarbershopAccessoryCategory.GetHoveredIndex]"
 																			}
-
+																			
 																			blockoverride "dropdown_size"
 																			{
-																				size = { 330 32 }
+																				size = { 362 32 }
 																			}
-
+																			
 																			blockoverride "dropdown_list_maxsize"
 																			{
-																				maximumsize = { 321 550 }
-																				position = { -20 32 }
+																				maximumsize = { 354 500 }
 																			}
-
+																			
 																			blockoverride "dropdown_active_item_properties"
 																			{
 																				text = "[BarbershopAccessoryItem.GetName]"
-																				margin_left = 5
 																			}
-
+																			
 																			blockoverride "dropdown_item_properties"
 																			{
 																				onmousehierarchyenter = "[BarbershopAccessoryItem.OnHover]"
 																				text = "[BarbershopAccessoryItem.GetName]"
 																			}
-
+																			
 																			blockoverride "dropdown_list_properties"
 																			{
 																				onmousehierarchyenter = "[BarbershopAccessoryCategory.SetShowTextSearch('(bool)no')]"
 																				onmousehierarchyleave = "[BarbershopWindow.RestorePreviousPortraitModifierIndex]"
 																			}
 																		}
-
-																		expand = {
-																			visible = "[GetVariableSystem.Exists('compact_clothes_pickers')]"
-																		}
 																	}
-
+																	
 																	editbox_standard = {
 																		visible = "[BarbershopAccessoryCategory.IsTextSearchVisible]"
 																		layoutpolicy_horizontal = expanding
-
+																		
 																		blockoverride "editbox_properties"
 																		{
 																			name = "input"
@@ -1431,31 +1361,33 @@ window = {
 																			ontextedited = "[BarbershopAccessoryCategory.OnEdit]"
 																		}
 																	}
-
+																	
 																	scrollbox = {
 																		name = "filtered_list"
 																		visible = "[BarbershopAccessoryCategory.HasItemsFiltered]"
 																		layoutpolicy_horizontal = expanding
 																		layoutpolicy_vertical = expanding
 																		size = { 100 204 }
-
+																		
 																		blockoverride "scrollbox_content"
 																		{
 																			vbox = {
 																				datamodel = "[BarbershopAccessoryCategory.GetItemsFiltered]"
 																				layoutpolicy_horizontal = expanding
-
+																				spacing = 3
+																				
 																				item = {
 																					button_standard = {
 																						name = "fuzzy_item_button"
 																						layoutpolicy_horizontal = expanding
 																						size = { 0 24 }
-
+																						
 																						onclick = "[BarbershopAccessoryCategory.OnSelectFiltered( PdxGuiWidget.GetIndexInDataModel )]"
 																						onmousehierarchyenter = "[BarbershopAccessoryItem.OnHover]"
 																						onmousehierarchyleave = "[BarbershopWindow.RestorePreviousPortraitModifierIndex]"
-
+																						
 																						button_ignore = none
+																						
 																						text_single = {
 																							text = "[BarbershopAccessoryItem.GetName]"
 																							parentanchor = vcenter|left
@@ -1469,18 +1401,18 @@ window = {
 																		}
 																	}
 																}
-
+																
 																vbox = {
 																	layoutpolicy_vertical = expanding
 																	margin_top = 8
-
+																	
 																	hbox = {
 																		visible = "[BarbershopAccessoryCategory.CanEditColor]"
 																		spacing = 3
-
+																		
 																		vbox = {
 																			layoutpolicy_vertical = expanding
-
+																			
 																			button_standard_clean = {
 																				background = {
 																					using = Background_Area_Dark
@@ -1489,36 +1421,36 @@ window = {
 																				size = { 50 50 }
 																				onclick = "[BarbershopAccessoryCategory.SelectColorPicker]"
 																				down = "[BarbershopAccessoryCategory.IsActiveColorPicker]"
-
+																				
 																				icon = {
 																					parentanchor = center
 																					size = { 42 42 }
-
+																					
 																					texture = "gfx/interface/colors/white.dds"
 																					tintcolor = "[BarbershopAccessoryCategory.GetCurrentColor]"
 																					using = Mask_Rough_Edges
-
+																					
 																					tooltip = "BARBERSHOP_SELECT_COLOR_PICKER_TT"
 																					using = tooltip_ne
 																				}
 																			}
 																		}
-
+																		
 																		button_clear = {
 																			name = "revert_to_default"
 																			visible = "[BarbershopAccessoryCategory.HasColorOverride]"
 																			size = { 32 32 }
 																			onclick = "[BarbershopAccessoryCategory.ResetColorToNatural]"
-
+																			
 																			tooltip = "BARBERSHOP_RESET_NATURAL_COLORS_TT"
 																			using = tooltip_ne
 																		}
 																	}
-
+																	
 																	expand = {}
 																}
-
-																expand = { }
+																
+																expand = {}
 															}
 														}
 													}
@@ -1549,7 +1481,7 @@ window = {
 														alpha = "[Select_float(GetVariableSystem.Exists('choosing_background'), '(float)0.3', '(float)1' )]"
 														datacontext = "[BarbershopWindow.GetColorPickerHandler]"
 
-														button_category = {
+														button_category_bb = {
 															layoutpolicy_horizontal = expanding
 															onclick = "[GetVariableSystem.Toggle('barber_color')]"
 															blockoverride "frame" {
@@ -1565,43 +1497,7 @@ window = {
 															name = "color_picker"
 															visible = "[And(Not(GetVariableSystem.Exists('barber_color')), Not(GetVariableSystem.Exists('choosing_background')))]"
 															layoutpolicy_horizontal = expanding
-															margin_top = -10
-															margin_bottom = -10
-
-															hbox = {
-																datacontext = "[BarbershopWindow.GetColorPickerHandler]"
-																visible = "[BarbershopColorPickerHandler.HasMultipleColorChannels]"
-
-																dropdown_menu_standard =
-																{
-																	blockoverride "dropdown_properties"
-																	{
-																		datamodel = "[BarbershopColorPickerHandler.GetColorChannels]"
-																		onselectionchanged = "[BarbershopColorPickerHandler.SetColorChannel]"
-																		selectedindex = "[BarbershopColorPickerHandler.GetHoveredIndex]"
-																	}
-
-																	blockoverride "dropdown_size"
-																	{
-																		size = { 300 32 }
-																	}
-
-																	blockoverride "dropdown_list_maxsize"
-																	{
-																		maximumsize = { 291 350 }
-																	}
-
-																	blockoverride "dropdown_active_item_properties"
-																	{
-																		text = "[BarbershopItem.GetName]"
-																	}
-
-																	blockoverride "dropdown_item_properties"
-																	{
-																		text = "[BarbershopItem.GetName]"
-																	}
-																}
-															}
+															margin_top = 10
 
 															barbershop_color_picker = {
 																visible = yes
@@ -1779,7 +1675,7 @@ window = {
 															}
 														}
 
-														button_category = {
+														button_category_bb = {
 															layoutpolicy_horizontal = expanding
 															onclick = "[GetVariableSystem.Toggle('disturbing_traits')]"
 															blockoverride "text" {
@@ -1926,6 +1822,7 @@ window = {
 														# datacontext = "[Character.MakeScope.Var('body_builder_var_bb').Story]"
 
 														state = {
+															name = "bb_setup_genes"
 															trigger_when = "[GetScriptedGui('bb_setup_genes').IsShown( GuiScope.SetRoot( Character.MakeScope ).End )]"
 															on_finish = "[GetScriptedGui('bb_setup_genes').Execute( GuiScope.SetRoot( Character.MakeScope ).End )]"
 														}
@@ -2533,12 +2430,10 @@ window = {
 							vbox = {
 								layoutpolicy_horizontal = expanding
 
-								# margin = { 10 0 }
-
 								hbox = {
 									layoutpolicy_horizontal = expanding
 
-									button_category = {
+									button_category_bb = {
 										layoutpolicy_horizontal = expanding
 										blockoverride "text" {
 											text = "extras_bb"
@@ -2555,7 +2450,6 @@ window = {
 									}
 								}
 
-
 								hbox = {
 									layoutpolicy_horizontal = expanding
 									spacing = 10
@@ -2565,9 +2459,8 @@ window = {
 
 									vbox = {
 										layoutpolicy_horizontal = expanding
+										layoutpolicy_vertical = expanding
 										spacing = -2
-
-										# visible = "[GetScriptedGui('has_dlc_iberia').IsShown( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
 
 										bg_button = {
 											text = "fp2_fullscreen_intro"
@@ -2604,12 +2497,14 @@ window = {
 												texture = "gfx/interface/illustrations/event_story/fp2_conciliation.dds"
 											}
 										}
+										expand = {}
 									}
 
 									vbox = {
 										layoutpolicy_horizontal = expanding
 										layoutpolicy_vertical = expanding
 										spacing = -2
+										
 										bg_button = {
 											text = "death_bb"
 											down = "[GetVariableSystem.HasValue('barber_bg', 'background_ruler_transition_bg')]"
@@ -2618,29 +2513,6 @@ window = {
 												texture = "gfx/interface/illustrations/background_ruler_transition.dds"
 											}
 										}
-										bg_button = {
-											text = "bp1_crossroads_inn"
-											down = "[GetVariableSystem.HasValue('barber_bg', 'bp1_crossroads_inn')]"
-											onclick = "[GetVariableSystem.SetOrToggle('barber_bg', 'bp1_crossroads_inn')]"
-											blockoverride "picture" {
-												texture = "gfx/interface/illustrations/event_scenes/bp1_crossroads_inn.dds"
-											}
-										}
-										bg_button = {
-											text = "bp1_wine_cellar"
-											down = "[GetVariableSystem.HasValue('barber_bg', 'bp1_wine_cellar')]"
-											onclick = "[GetVariableSystem.SetOrToggle('barber_bg', 'bp1_wine_cellar')]"
-											blockoverride "picture" {
-												texture = "gfx/interface/illustrations/event_scenes/bp1_wine_cellar.dds"
-											}
-										}
-										expand = {}
-									}
-
-									vbox = {
-										layoutpolicy_horizontal = expanding
-										spacing = -2
-
 										bg_button = {
 											text = "black"
 											down = "[GetVariableSystem.HasValue('barber_bg', 'black_bg')]"
@@ -2744,54 +2616,6 @@ window = {
 												}
 											}
 										}
-
-										# button_standard = {
-										# 	datacontext = "[BarbershopWindow.GetMainCharacter]"
-										# 	layoutpolicy_horizontal = expanding
-										#
-										# 	onclick = "[PdxGuiTriggerAllAnimations('add_child_to_barbershop')]"
-										#
-										# 	raw_text = "Add all children"
-										# 	visible = "[GetScriptedGui('add_children_to_barbershop').IsShown( GuiScope.SetRoot( Character.MakeScope ).End )]"
-										#
-										# 	vbox = {
-										# 		datamodel = "[Character.MakeScope.GetList('barber_children')]"
-										# 		item = {
-										# 			button = {
-										# 				datacontext = "[Scope.GetCharacter]"
-										# 				visible = "[Not(Character.IsPinned)]"
-										# 				state = {
-										# 					name = "add_child_to_barbershop"
-										# 					on_finish = "[Character.ToggleCharacterPinned]"
-										# 				}
-										# 			}
-										# 		}
-										# 	}
-										# }
-										#
-										# button_standard = {
-										# 	datacontext = "[BarbershopWindow.GetMainCharacter]"
-										# 	layoutpolicy_horizontal = expanding
-										#
-										# 	onclick = "[PdxGuiTriggerAllAnimations('remove_child_from_barbershop')]"
-										#
-										# 	raw_text = "Remove all children"
-										# 	visible = "[GetScriptedGui('are_children_pinned').IsShown( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
-										#
-										# 	vbox = {
-										# 		datamodel = "[Character.MakeScope.GetList('barber_children')]"
-										# 		item = {
-										# 			button = {
-										# 				datacontext = "[Scope.GetCharacter]"
-										# 				visible = "[Character.IsPinned]"
-										# 				state = {
-										# 					name = "remove_child_from_barbershop"
-										# 					on_finish = "[Character.ToggleCharacterPinned]"
-										# 				}
-										# 			}
-										# 		}
-										# 	}
-										# }
 									}
 								}
 							}
@@ -3286,7 +3110,7 @@ window = {
 
 	# invisible controls
 	container = {
-		# visible = "[Not(BarbershopScreenshotHandler.IsScreenshotButtonVisible)]"
+		visible = "[Not(BarbershopScreenshotHandler.IsScreenshotButtonVisible)]"
 		button = {
 			shortcut = speed_1
 			onclick = "[BarbershopScreenshotHandler.ToggleScreenshotButtons]"
@@ -3297,6 +3121,8 @@ window = {
 			onclick = "[BarbershopScreenshotHandler.ToggleScreenshotButtons]"
 			onclick = "[BarbershopWindow.SetTabSceneVisible]"
 		}
+	}
+	container = {
 		button = {
 			shortcut = "barbershop_zoom_in"
 			shortcut = "barbershop_zoom_in_2"
@@ -3372,7 +3198,6 @@ types BarbershopTypes {
 
 			hbox = {
 				datacontext = "[BarbershopWindow.GetColorPickerHandler]"
-				layoutpolicy_horizontal = expanding
 				visible = "[BarbershopColorPickerHandler.HasMultipleColorChannels]"
 
 				dropdown_menu_standard =
@@ -3386,13 +3211,12 @@ types BarbershopTypes {
 
 					blockoverride "dropdown_size"
 					{
-						size = { 336 32 }
+						size = { 300 32 }
 					}
 
 					blockoverride "dropdown_list_maxsize"
 					{
-						maximumsize = { 327 350 }
-						position = { 4 32 }
+						maximumsize = { 291 350 }
 					}
 
 					blockoverride "dropdown_active_item_properties"
@@ -3405,8 +3229,6 @@ types BarbershopTypes {
 						text = "[BarbershopItem.GetName]"
 					}
 				}
-
-				expand = { }
 			}
 
 			# even though it's hidden it's required or will crash
@@ -4610,7 +4432,6 @@ types BarbershopTypes {
 
 		expand = { }
 	}
-
 	type bb_button_round = button {
 		size = { 21 25 }
 		block "icon" {
@@ -4640,7 +4461,6 @@ types BarbershopTypes {
 		onrightclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Character.MakeScope ).End)]"
 		button_ignore = none
 	}
-
 	type widget_bb_shadow = widget {
 		size = { 100% 100% }
 
@@ -4665,4 +4485,224 @@ types BarbershopTypes {
 			texture = "gfx/interface/frontend/portrait_main_menu_shadow.dds"
 		}
 	}
+}
+
+types BBTypes {
+	type button_FB_list = button_normal {
+		texture = "gfx/interface/buttons/button_standard.dds"
+		size = { 200 33 }
+		gfxtype = togglepushbuttongfx
+		effectname = "NoHighlight"
+
+		upframe = 1
+		uphoverframe = 2
+		uppressedframe = 3
+		downframe = 4
+		downhoverframe = 4
+		downpressedframe = 4
+		disableframe = 7
+
+		spriteType = Corneredtiled
+		spriteborder = { 3 3 }
+		framesize = { 249 78 }
+
+		buttonText = {
+			text_single = {
+				size = { 100% 100% }
+				autoresize = no
+				margin = { 10 0 }
+				block "margin" {}
+				align = nobaseline
+				default_format = "#clickable"
+				max_width = 170
+			}
+		}
+		block "bg_preview" {
+		}
+
+		modify_texture = {
+			name = "overlay"
+			texture = "gfx/interface/buttons/button_standard_overlay.dds"
+			spriteType = Corneredstretched
+			spriteborder = { 3 3 }
+			blend_mode = overlay
+			alpha = 0.3
+		}
+
+		block "disabled"
+		{
+			highlight_icon = {
+				size = { 100% 100% }
+				gfxtype = togglepushbuttongfx
+				effectname = "NoHighlight"
+				texture = "gfx/interface/buttons/button_disabled_stripes.dds"
+				spriteType = Corneredtiled
+				spriteborder = { 2 2 }
+				framesize	= { 238 63 }
+
+				upframe = 1
+				uphoverframe = 1
+				uppressedframe = 1
+				downframe = 1
+				downhoverframe = 1
+				downpressedframe = 1
+				disableframe = 2
+
+				alpha = 0.4
+
+				modify_texture = {
+					name = "overlay"
+					texture = "gfx/interface/buttons/button_standard_overlay.dds"
+					spriteType = Corneredstretched
+					spriteborder = { 3 3 }
+					blend_mode = overlay
+				}
+
+				block "button_standard_mouseover" {}
+			}
+		}
+
+		highlight_icon = {
+			size = { 100% 100% }
+			gfxtype = togglepushbuttongfx
+			effectname = "NoHighlight"
+			texture = "gfx/interface/buttons/button_mouseover.dds"
+			spriteType = Corneredstretched
+			spriteborder = { 20 20 }
+			framesize	= { 238 63 }
+
+			upframe = 1
+			uphoverframe = 2
+			uppressedframe = 1
+			downframe = 1
+			downhoverframe = 1
+			downpressedframe = 1
+			disableframe = 1
+
+			alpha = 0.5
+
+			block "button_standard_mouseover" {}
+		}
+
+		margin_widget = {
+			size = { 100% 100% }
+			margin = { 3 3 }
+
+			block "vignette"
+			{
+				icon = {
+					name = "vignette"
+					size = { 100% 100% }
+					alpha = 0.2
+					texture = "gfx/interface/component_masks/mask_vignette.dds"
+					color = { 0.15 0.15 0.15 1 }
+				}
+			}
+		}
+	}
+
+	type trait_button = button_standard {
+		layoutpolicy_horizontal = expanding
+		down = "[ScriptedGui.IsShown( GuiScope.SetRoot( Character.MakeScope ).End)]"
+		onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Character.MakeScope ).End)]"
+		# enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Character.MakeScope ).End)]"
+		align = left|nobaseline
+		margin_right = 40
+
+		icon = {
+			parentanchor = right
+			size = { 33 33 }
+			block "icon" {
+			}
+		}
+	}
+
+	type bg_button = button_standard {
+
+		size = { 0 25 }
+		layoutpolicy_horizontal = expanding
+		allow_outside = yes
+		align = left|nobaseline
+
+		# onclick = "[PdxGuiTriggerAllAnimations('hide_bg')]"
+		# onrightclick = "[PdxGuiTriggerAllAnimations('hide_bg')]"
+		# tooltip = "right_click_light"
+		# button_ignore = none
+
+		icon = {
+			parentanchor = right
+			size = { 45% 100% }
+
+			name = "picture"
+			alpha = 0.6
+			state = {
+				name = highlight
+				alpha = 1
+			}
+			state = {
+				name = dehighlight
+				alpha = 0.6
+			}
+			background = {
+				block "picture" {
+
+				}
+				using = Mask_Rough_Edges
+				fittype = centercrop
+				modify_texture = {
+					texture = "gfx/interface/component_masks/mask_fade_horizontal_extended.dds"
+					blend_mode = alphamultiply
+					rotate_uv = 3
+				}
+			}
+		}
+	}
+
+	type button_category_bb = button {
+		size = { 0 30 }
+
+		background = {
+			using = Background_Area_Dark
+			alpha = 0.5
+		}
+
+		hbox = {
+			layoutpolicy_horizontal = expanding
+			spacing = 10
+			button_expand = {
+				size = { 22 22 }
+				alwaystransparent = yes
+				block "frame" {
+					visible = no
+					frame = "[Select_int32( GetVariableSystem.Exists('big_throneroom'), '(int32)1', '(int32)2')]"
+				}
+			}
+
+			button_checkbox = {
+				size = { 25 25 }
+				alwaystransparent = yes
+				block "check" {
+					visible = no
+				}
+			}
+
+			text_single = {
+				name = "category"
+				layoutpolicy_horizontal = expanding
+				# max_width = 170
+				align = nobaseline
+				default_format = "#clickable"
+
+				block "text"
+				{
+					raw_text = "test"
+				}
+			}
+		}
+	}
+}
+
+template Barbershop_Font_Size_Huge {
+	fontsize = 33
+	size = { 0 43 }
 }
