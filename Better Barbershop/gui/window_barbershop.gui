@@ -836,19 +836,7 @@ window = {
 					margin_right = 5
 					spacing = 5
 
-					using = Window_Background_Sidebar_Multiplayer_Left
-
-					background = {
-						using = Background_Area_Dark
-						margin_right = 5
-
-						modify_texture = {
-							blend_mode = alphamultiply
-							alpha = 0.8
-							mirror = vertical
-							texture = "gfx/interface/component_masks/mask_fade_vertical.dds"
-						}
-					}
+					using = Window_Background_Sidebar
 
 					#### TABS HEADER ####
 					hbox = {
@@ -1222,7 +1210,7 @@ window = {
 											}
 										}
 									}
-									
+
 									hbox = {
 										layoutpolicy_horizontal = expanding
 										visible = "[And(BarbershopWindow.IsTabAppearanceVisible, PdxGuiTabs.IsTabSet( 'clothes' ))]"
@@ -1242,9 +1230,7 @@ window = {
 											}
 										}
 										expand = {}
-										
 									}
-									
 
 									# contents
 									scrollbox = {
@@ -1321,12 +1307,12 @@ window = {
 																			
 																			blockoverride "dropdown_size"
 																			{
-																				size = { 362 32 }
+																				size = { 342 32 }
 																			}
 																			
 																			blockoverride "dropdown_list_maxsize"
 																			{
-																				maximumsize = { 354 500 }
+																				maximumsize = { 334 500 }
 																			}
 																			
 																			blockoverride "dropdown_active_item_properties"
@@ -1420,6 +1406,7 @@ window = {
 																				name = "color_button"
 																				size = { 50 50 }
 																				onclick = "[BarbershopAccessoryCategory.SelectColorPicker]"
+																				onclick = "[GetVariableSystem.Clear( 'barber_color' )]"
 																				down = "[BarbershopAccessoryCategory.IsActiveColorPicker]"
 																				
 																				icon = {
@@ -1474,38 +1461,6 @@ window = {
 													}
 
 													spacer = { size = { 0 5 } }
-
-													# hair color
-													vbox = {
-														layoutpolicy_horizontal = expanding
-														alpha = "[Select_float(GetVariableSystem.Exists('choosing_background'), '(float)0.3', '(float)1' )]"
-														datacontext = "[BarbershopWindow.GetColorPickerHandler]"
-
-														button_category_bb = {
-															layoutpolicy_horizontal = expanding
-															onclick = "[GetVariableSystem.Toggle('barber_color')]"
-															blockoverride "frame" {
-																frame = "[Select_int32( GetVariableSystem.Exists('barber_color'), '(int32)1', '(int32)2')]"
-															}
-															blockoverride "text" {
-																text = "COA_DESIGNER_COLOR_PICKER_EXPAND_HEADER"
-															}
-														}
-
-														### APPEARANCE TAB - Color picker ###
-														vbox = {
-															name = "color_picker"
-															visible = "[And(Not(GetVariableSystem.Exists('barber_color')), Not(GetVariableSystem.Exists('choosing_background')))]"
-															layoutpolicy_horizontal = expanding
-															margin_top = 10
-
-															barbershop_color_picker = {
-																visible = yes
-																color = "[BarbershopColorPickerHandler.GetColor]"
-																oncoloredited = "[BarbershopColorPickerHandler.PickColor]"
-															}
-														}
-													}
 
 													# PoE clothes color
 													ccp_clothes_color_picker = {}
@@ -2111,12 +2066,81 @@ window = {
 
 													}
 												}
-
 											}
 										}
 									}
 
 									expand = {}
+									
+									# vanilal color picker
+									vbox = {
+										layoutpolicy_horizontal = expanding
+										visible = "[And(BarbershopWindow.IsTabAppearanceVisible, PdxGuiTabs.IsTabSet( 'clothes' ))]"
+										alpha = "[Select_float(GetVariableSystem.Exists('choosing_background'), '(float)0.3', '(float)1' )]"
+										datacontext = "[BarbershopWindow.GetColorPickerHandler]"
+										margin_top = -5
+										
+										button_category_bb = {
+											layoutpolicy_horizontal = expanding
+											onclick = "[GetVariableSystem.Toggle('barber_color')]"
+											blockoverride "frame" {
+												frame = "[Select_int32( GetVariableSystem.Exists('barber_color'), '(int32)1', '(int32)2')]"
+											}
+											blockoverride "text" {
+												text = "COA_DESIGNER_COLOR_PICKER_EXPAND_HEADER"
+											}
+										}
+										
+										### APPEARANCE TAB - Color picker ###
+										vbox = {
+											name = "color_picker"
+											visible = "[And(Not(GetVariableSystem.Exists('barber_color')), Not(GetVariableSystem.Exists('choosing_background')))]"
+											layoutpolicy_horizontal = expanding
+											
+											hbox = {
+												datacontext = "[BarbershopWindow.GetColorPickerHandler]"
+												visible = "[BarbershopColorPickerHandler.HasMultipleColorChannels]"
+												
+												margin_right = 60
+												
+												dropdown_menu_standard =
+												{
+													blockoverride "dropdown_properties"
+													{
+														datamodel = "[BarbershopColorPickerHandler.GetColorChannels]"
+														onselectionchanged = "[BarbershopColorPickerHandler.SetColorChannel]"
+														selectedindex = "[BarbershopColorPickerHandler.GetHoveredIndex]"
+													}
+													
+													blockoverride "dropdown_size"
+													{
+														size = { 300 32 }
+													}
+													
+													blockoverride "dropdown_list_maxsize"
+													{
+														maximumsize = { 291 350 }
+													}
+													
+													blockoverride "dropdown_active_item_properties"
+													{
+														text = "[BarbershopItem.GetName]"
+													}
+													
+													blockoverride "dropdown_item_properties"
+													{
+														text = "[BarbershopItem.GetName]"
+													}
+												}
+											}
+											
+											barbershop_color_picker = {
+												visible = yes
+												color = "[BarbershopColorPickerHandler.GetColor]"
+												oncoloredited = "[BarbershopColorPickerHandler.PickColor]"
+											}
+										}
+									}
 
 									hbox = {
 										layoutpolicy_horizontal = expanding
@@ -2806,8 +2830,7 @@ window = {
 					vbox = {
 						alpha = "[Select_float(GetVariableSystem.Exists('choosing_background'), '(float)0.3', '(float)1' )]"
 						name = "apply_box"
-						margin = { 5 0 }
-						margin_left = 10
+						margin = { 10 0 }
 						spacing = 10
 						layoutpolicy_horizontal = expanding
 
@@ -2865,8 +2888,7 @@ window = {
 							}
 						}
 
-						hbox = {
-							spacing = 10
+						vbox = {
 							layoutpolicy_horizontal = expanding
 
 							button_primary = {
@@ -2878,19 +2900,17 @@ window = {
 								# tooltip = "BARBERSHOP_APPLY_CHANGES_TT"
 								using = tooltip_ne
 							}
+							button = {
+								layoutpolicy_horizontal = expanding
+								size = { 0 5 }
+								enabled = "[Not(GetVariableSystem.Exists('choosing_background'))]"
+								onclick = "[BarbershopWindow.ApplyAndClose]"
+							}
 						}
 
-						button = {
-							layoutpolicy_horizontal = expanding
-							size = { 0 5 }
-							enabled = "[Not(GetVariableSystem.Exists('choosing_background'))]"
-							onclick = "[BarbershopWindow.ApplyAndClose]"
-						}
 					}
 				}
-
 				expand = { }
-
 			}
 			expand = { }
 		}
@@ -3189,47 +3209,12 @@ types BarbershopTypes {
 	type barbershop_color_picker = colorpicker
 	{
 		datacontext = "[BarbershopWindow.GetColorPickerHandler]"
-		size = { 460 300 }
+		size = { 460 270 }
 		allow_outside = yes
 
 		vbox = {
 			name = "colorpicker_window"
 			spacing = 5
-
-			hbox = {
-				datacontext = "[BarbershopWindow.GetColorPickerHandler]"
-				visible = "[BarbershopColorPickerHandler.HasMultipleColorChannels]"
-
-				dropdown_menu_standard =
-				{
-					blockoverride "dropdown_properties"
-					{
-						datamodel = "[BarbershopColorPickerHandler.GetColorChannels]"
-						onselectionchanged = "[BarbershopColorPickerHandler.SetColorChannel]"
-						selectedindex = "[BarbershopColorPickerHandler.GetHoveredIndex]"
-					}
-
-					blockoverride "dropdown_size"
-					{
-						size = { 300 32 }
-					}
-
-					blockoverride "dropdown_list_maxsize"
-					{
-						maximumsize = { 291 350 }
-					}
-
-					blockoverride "dropdown_active_item_properties"
-					{
-						text = "[BarbershopItem.GetName]"
-					}
-
-					blockoverride "dropdown_item_properties"
-					{
-						text = "[BarbershopItem.GetName]"
-					}
-				}
-			}
 
 			# even though it's hidden it's required or will crash
 			widget = {
@@ -4192,9 +4177,9 @@ types BarbershopTypes {
 		}
 
 		barbershop_name_window = { }
-		#TODO test
+		
 		vbox = {
-			visible = "[And( InDebugMode, Not( Character.AccessDenied ) )]"
+			visible = "[And(And( InDebugMode, Not( Character.AccessDenied ) ), Not(GetVariableSystem.Exists( 'barber_controls' )))]"
 
 			tooltipwidget = {
 				barbershop_character_tooltip = {
